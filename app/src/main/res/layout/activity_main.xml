@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -9,6 +10,55 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Write a postal code down here"/>
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/postalCodeEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/getWeatherButton"
+        app:layout_constraintTop_toBottomOf="@id/greetingTextView"
+        android:hint="Postal code"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/getWeatherButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/postalCodeEditText"
+        app:layout_constraintTop_toBottomOf="@id/greetingTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Search"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/skyTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/postalCodeEditText"
+        android:gravity="center"
+        tools:text="Windy"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/temperatureTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/skyTextView"
+        android:padding="20dp"
+        android:gravity="center"
+        tools:text="28"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/humidityTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/temperatureTextView"
+        android:padding="20dp"
+        android:gravity="center"
+        tools:text="30%"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
