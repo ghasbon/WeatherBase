@@ -21,22 +21,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) {
-        if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
-            getUserLocation()
-        } else Unit
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (isLocationPermissionGranted()) {
-            getUserLocation()
-        } else {
-            locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
-        }
+        MyPermissionManager().withPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, ::getUserLocation)
 
         findViewById<Button>(R.id.getWeatherButton).setOnClickListener {
             val postalCode = findViewById<EditText>(R.id.postalCodeEditText).text
@@ -44,6 +32,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 viewModel.onPostalCodeInput(postalCode.toString())
             }
         }
+
         lifecycleScope.launchWhenCreated {
             viewModel.state.collect(::updateWeatherUi)
         }
@@ -65,11 +54,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         findViewById<TextView>(R.id.skyTextView).text = uiState.sky
         findViewById<TextView>(R.id.temperatureTextView).text = uiState.temperature
         findViewById<TextView>(R.id.humidityTextView).text = uiState.humidity
-    }
-
-    private fun isLocationPermissionGranted(): Boolean {
-        val locationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
-        val isGranted = ContextCompat.checkSelfPermission(this, locationPermission)
-        return isGranted == PackageManager.PERMISSION_GRANTED
     }
 }
