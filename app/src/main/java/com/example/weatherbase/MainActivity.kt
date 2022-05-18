@@ -1,25 +1,25 @@
 package com.example.weatherbase
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val locationManager = MyLocationManager()
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -49,15 +49,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun getUserLocation() {
-        val fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
-        fusedLocationProvider.lastLocation.addOnSuccessListener { location ->
-            location?.let {
-                lifecycleScope.launch {
-                    viewModel.onGpsLocationOk(it.latitude, it.longitude)
-                }
-            } ?: Toast.makeText(this, "Location error", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            locationManager.getLocation(this@MainActivity).collect {
+                viewModel.onGpsLocationOk(it.latitude, it.longitude)
+            }
         }
     }
 
