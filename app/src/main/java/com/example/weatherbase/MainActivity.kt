@@ -1,8 +1,12 @@
 package com.example.weatherbase
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -12,6 +16,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -20,6 +25,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val viewModel: MainViewModel by viewModels()
 
     private val locationManager = MyLocationManager()
+
+    private var locationFlowJob: Job? = null
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -47,10 +54,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         lifecycleScope.launchWhenCreated {
             viewModel.state.collect(::updateWeatherUi)
         }
+
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, intent: Intent?) {
+                if (intent?.action?.contains(LocationManager.PROVIDERS_CHANGED_ACTION) == true) {
+                    getUserLocation()
+                }
+            }
+        }, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
     }
 
     private fun getUserLocation() {
-        lifecycleScope.launch {
+        locationFlowJob?.cancel()
+        locationFlowJob = lifecycleScope.launch {
             locationManager.getLocation(this@MainActivity).collect {
                 viewModel.onGpsLocationOk(it.latitude, it.longitude)
             }
