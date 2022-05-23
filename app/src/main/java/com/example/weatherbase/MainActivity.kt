@@ -1,75 +1,31 @@
 package com.example.weatherbase
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) {
-        if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
-            getUserLocation()
-        } else Unit
+    private val jobManager by lazy {
+        AsyncJobManager(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (isLocationPermissionGranted()) {
-            getUserLocation()
-        } else {
-            locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
-        }
-
-        findViewById<Button>(R.id.getWeatherButton).setOnClickListener {
-            val postalCode = findViewById<EditText>(R.id.postalCodeEditText).text
-            lifecycleScope.launch {
-                viewModel.onPostalCodeInput(postalCode.toString())
+        jobManager.add {
+            (1..100).forEach {
+                delay(500)
+                println("I am still active $it")
             }
         }
-        lifecycleScope.launchWhenCreated {
-            viewModel.state.collect(::updateWeatherUi)
+        jobManager.add(shouldResume = true) {
+            (1..100).forEach {
+                delay(500)
+                println("I am still active and resumable $it")
+            }
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getUserLocation() {
-        val fusedLocationProvider = LocationServices.getFusedLocationProviderClient(this)
-        fusedLocationProvider.lastLocation.addOnSuccessListener { location ->
-            location?.let {
-                lifecycleScope.launch {
-                    viewModel.onGpsLocationOk(it.latitude, it.longitude)
-                }
-            } ?: Toast.makeText(this, "Location error", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun updateWeatherUi(uiState: WeatherUiState) {
-        findViewById<TextView>(R.id.skyTextView).text = uiState.sky
-        findViewById<TextView>(R.id.temperatureTextView).text = uiState.temperature
-        findViewById<TextView>(R.id.humidityTextView).text = uiState.humidity
-    }
-
-    private fun isLocationPermissionGranted(): Boolean {
-        val locationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
-        val isGranted = ContextCompat.checkSelfPermission(this, locationPermission)
-        return isGranted == PackageManager.PERMISSION_GRANTED
     }
 }
