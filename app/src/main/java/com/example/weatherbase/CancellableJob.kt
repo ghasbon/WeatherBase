@@ -5,7 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-final class CancellableJob private constructor(
+data class CancellableJob(
     private val scope: CoroutineScope,
     private val action: suspend CoroutineScope.() -> Unit
 ) {
@@ -23,11 +23,5 @@ final class CancellableJob private constructor(
 
     fun stop() {
         job?.cancel()
-    }
-
-    fun copy() = CancellableJob(this.scope, this.action)
-
-    companion object {
-        fun create(scope: CoroutineScope, action: suspend CoroutineScope.() -> Unit) = CancellableJob(scope, action)
     }
 }

@@ -49,7 +49,7 @@ class AsyncJobManager(private val lifecycleOwner: LifecycleOwner) {
         shouldResume: Boolean = false,
         jobBlock: suspend CoroutineScope.() -> Unit
     ) {
-        val cancellableJob = CancellableJob.create(lifecycleOwner.lifecycleScope, jobBlock)
+        val cancellableJob = CancellableJob(lifecycleOwner.lifecycleScope, jobBlock)
         val resumableJob = ResumableJob(cancellableJob, stopAt, shouldResume)
         asyncJobs.add(resumableJob)
         resumableJob.myJob.start()
